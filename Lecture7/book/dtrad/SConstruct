@@ -1,0 +1,30 @@
+from rsf.proj import *
+import os
+HOME=os.environ.get('HOME')
+METHOD=1 # second order
+METHOD=2 # fourth order
+METHOD=3 # eight order
+Fetch('marmvel.hh','marm')
+
+Flow('vel','marmvel.hh',
+	'''
+	dd form=native | window j1=2 j2=2 | 
+     	put label1=Depth  unit1=m label2=Lateral unit2=m
+	''')
+Result('vel',
+	'''
+	grey color=j mean=y title="Marmousi model" scalebar=y 
+	bartype=v barlabel="V" 	barunit="m/s"
+	''')
+
+Flow('shot','vel',
+	'''
+	../../user/dtrad/sfsynthfd csdgather=n fm=20 amp=1 dt=0.0008 ns=1 ng=297 nt=3600
+	sxbeg=170 szbeg=5 jsx=3 jsz=0 gxbeg=170 gzbeg=5 jgx=3 jgz=0 method=%d
+	''' % METHOD )
+Result('shot',
+	'''
+	grey title="FD method %d"
+	''' % METHOD )
+        
+End()

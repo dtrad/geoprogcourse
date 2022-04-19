@@ -1,0 +1,78 @@
+
+import os, sys, re, string, glob
+RSFSRC=os.environ.get('RSFSRC')
+sys.path.append(RSFSRC+'/framework')
+import bldutil
+
+progs = '''
+'''
+
+mpi_progs = ''
+
+ccprogs = '''
+lsprtmdtc
+'''
+
+subs = '''
+rtmclass
+cgsolver
+'''
+
+try:  # distributed version
+    Import('env root pkgdir bindir')
+    env = env.Clone()
+except: # local version
+    env = bldutil.Debug()
+    root = None
+
+print("RSFSRC",RSFSRC)
+env.Prepend(CPPPATH=[RSFSRC+'/build/include'],
+            LIBPATH=[RSFSRC+'/build/lib'],
+            LIBS=[env.get('DYNLIB','')+'rsf'])
+
+env.Prepend(CCFLAGS = '-O3 -g ')
+
+if 'c++' in env.get('API',[]):
+    env.Prepend(LIBS=[env.get('DYNLIB','')+'rsf++'])
+
+src = Glob('[a-z]*.c')
+
+for source in src:
+    inc = env.RSF_Include(source,prefix='')
+    obj = env.StaticObject(source)
+    env.Depends(obj,inc)
+
+mains = Split(progs)
+for prog in mains:
+    sources = ['M' + prog]
+    bldutil.depends (env, sources, 'M'+prog)
+    prog = env.Program (prog, map (lambda x: x + '.c',sources))
+    if root:
+        env.Install (bindir, prog)
+
+ccmains = Split(ccprogs)
+subs = Split(subs)
+
+if 'c++' in env.get('API',[]):
+    objs = map(lambda x:  env.StaticObject(x+'.cc'), subs)
+
+for prog in ccmains:
+    if 'c++' in env.get('API',[]):
+        prog = env.Program (prog, ['M'+prog+'.cc'] + objs)
+        env.Depends(prog,map (lambda x: x + '.hh', subs))
+    else:
+        prog = env.RSF_Place ('sf' + prog, None, var='API', package='c++')
+    if root:
+        env.Install(bindir,prog)
+######################################################################
+# SELF-DOCUMENTATION
+######################################################################
+if root:
+    user = os.path.basename(os.getcwd())
+    main = 'sf%s.py' % user
+    
+    docs = map(lambda prog: env.Doc(prog,'M' + prog),mains) + \
+           map(lambda prog: env.Doc(prog,'M%s.cc' % prog, lang='c'),ccmains)
+    env.Depends(docs,'#/framework/rsf/doc.py')	
+    doc = env.RSF_Docmerge(main,docs)
+    env.Install(pkgdir,doc)

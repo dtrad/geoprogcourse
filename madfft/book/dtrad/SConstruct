@@ -1,0 +1,19 @@
+from rsf.proj import *
+import os
+RSFSRC=os.environ.get('RSFSRC')
+MYPATH=RSFSRC+'/user/dtrad2'
+MYPATH2=RSFSRC+'/user/dtrad2a'
+ns=2
+jsx=25
+sxbeg=500
+
+
+Flow('vel','/data/rsf/vmarm','cp out=stdout')
+Flow('shots','vel',
+     '''%s/sfsynthfd fm=15 amp=1 dt=0.0008 ns=%d ng=297 nt=3600 
+         sxbeg=%d szbeg=5 jsx=%d jsz=0 gxbeg=170 gzbeg=5 jgx=3 jgz=0 
+         order=2 nbup=30
+         ''' % (MYPATH,ns,sxbeg,jsx))
+
+Flow('shotsf','shots','''%s/sfmyfft'''%MYPATH2)
+End()

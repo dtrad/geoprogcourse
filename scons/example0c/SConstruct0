@@ -1,0 +1,3 @@
+Library('foo',['func1.c','cpptest.cpp'])
+Program('hello.c',LIBS=['foo'],LIBPATH='.')
+

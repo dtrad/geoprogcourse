@@ -1,0 +1,48 @@
+# simple RTM tests for comparisons with lsrtm in cluster.
+from rsf.proj import *
+import os
+
+RSFSRC=os.environ.get('RSFSRC')
+HOME=os.environ.get('HOME')
+
+testadj=0
+ns=25
+jsx=30
+niter=0
+order=8
+
+MYPATH=HOME+'/geoprog/Lecture8b/user/dtrad'
+
+print 'RSFSRC',RSFSRC
+print 'HOME',HOME
+print 'MYPATH',MYPATH
+
+Flow('velb','/data/rsf/vmarm.rsf','cp')
+Flow('rho','velb','''math output="1"''');
+
+
+### Data modeling from original velocity
+if (1):
+    Flow('shots','velb rho',
+	'''
+        %s/user/dtrad2/sfsynthfd csdgather=n 
+	fm=20 amp=1 dt=0.0008 ns=%d ng=297 nt=3600
+	sxbeg=170 szbeg=5 jsx=%d jsz=0 gxbeg=170 gzbeg=5 jgx=3 jgz=0 
+	method=0 nbup=30 rho=${SOURCES[1]} order=8
+	''' % (RSFSRC,ns,jsx))
+
+### select one shot for comparison with mpi version
+Flow('shotsb','shots','window n3=1');
+### LSRTM from sharp velocity and smooth velocity
+if (1):
+    Flow('imgborn imgborn0','shots velb',
+	'''
+        %s/sflsprtmbornb vel=${SOURCES[1]} option=2 mute=0 
+	imgrtm=${TARGETS[1]} nb=30 predict=0 niter=%d testadj=%d nbup=30
+        maxoffset=5000 order=%d
+	''' % (MYPATH,niter,testadj,order))
+
+End()
+
+
+

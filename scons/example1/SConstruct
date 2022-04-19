@@ -1,0 +1,6 @@
+import os, sys, re, string
+env = Environment() # Initialize the environment
+prog = env.Program(target = 'test0', source = ["test0.cpp"])
+env.Install('/home/dtrad/bin',prog)
+env.Alias('install',['/home/dtrad/bin'])
+

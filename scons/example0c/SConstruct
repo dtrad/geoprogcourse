@@ -1,0 +1,2 @@
+SharedLibrary('foo',['func1.c','cpptest.cpp'])
+

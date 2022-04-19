@@ -1,0 +1,7 @@
+gcc -I/home/dtrad/cwp/include -O  -std=c99 -Wall -pedantic -Wno-long-long  -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -DCWP_LITTLE_ENDIAN -DSUXDR  -D_BSD_SOURCE -D_POSIX_SOURCE suharlan.c  -L/home/dtrad/cwp/lib -lsu -lpar -lcwp -lm  -o /home/dtrad/cwp/bin/suharlan
+chmod 755 /home/dtrad/cwp/bin/suharlan
+
+
+
+gcc -c supick.c -O  -std=c99 -Wall -pedantic -Wno-long-long  -g -O0 -I/home/dtrad/cwp/include -O  -std=c99 -Wall -pedantic -Wno-long-long  -g -O0 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -DCWP_LITTLE_ENDIAN -DSUXDR  -D_BSD_SOURCE -D_POSIX_SOURCE -I/home/dtrad/cwp/include  
+gcc -o supick supick.o  -L/home/dtrad/cwp/lib -lsu -lpar -lcwp -lm

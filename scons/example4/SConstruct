@@ -1,0 +1,12 @@
+srcs = ['seekdemo.cpp','tanyclass.cpp','bstream.cpp','bfstream.cpp'] 
+SharedLibrary('foo',srcs)
+#Library('foo',srcs)
+#Program('seekdemo',srcs)
+
+env = Environment(CPPPATH = ['.'], STUDENTS = ['check this out'])
+
+
+for key in ['STUDENTS', 'CPPPATH','LIBSUFFIX']:
+    print "key = %s, value = %s" % (key, env[key])
+
+Program('seekdemo','seekdemo.cpp', LIBS=['foo'],LIBPATH='.',CXXFLAGS='-O2')

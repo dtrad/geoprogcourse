@@ -1,0 +1,12 @@
+# This is a comment
+
+env = Environment()   # Create an environmnet
+
+lib_target  = "hello"
+lib_sources = ["libhello.c"]
+
+env.SharedLibrary(target = lib_target, source = lib_sources)
+hello = env.Program(source = ["helloworld.c"], target = "helloworld")
+
+env.Install(dir = "/usr/local/bin", source = hello)
+env.Alias('install', ['/usr/local/bin'])

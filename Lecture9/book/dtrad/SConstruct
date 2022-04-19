@@ -1,0 +1,76 @@
+from rsf.proj import *
+import os
+RSFSRC=os.environ.get('RSFSRC')
+HOME=os.environ.get('HOME')
+
+print 'RSFSRC',RSFSRC
+print 'HOME',HOME
+nshots=1
+niter=5
+Fetch('marmvel.hh','marm')
+
+Flow('vel','marmvel.hh',
+	'''
+	dd form=native | window j1=2 j2=2 | 
+     	put label1=Depth  unit1=m label2=Lateral unit2=m
+	''')
+Result('vel',
+	'''
+	grey color=j mean=y title="Marmousi model" scalebar=y 
+	bartype=v barlabel="V" 	barunit="m/s"
+	''')
+
+if (1):
+    Flow('shots','vel',
+         '''
+         ../../../Lecture7/user/dtrad/sfsynthfd csdgather=n fm=20 
+         amp=1 dt=0.0008 ns=%d ng=297 nt=3600 
+         sxbeg=170 szbeg=5 jsx=30 jsz=0 
+         gxbeg=170 gzbeg=5 jgx=3  jgz=0 
+         nbup=30 nb=30
+         ''' % nshots )
+
+if (0):
+    Flow('shots','vel',
+         '''
+         mshots csdgather=n 
+         fm=20 amp=1 dt=0.0008 ns=%d ng=297 nt=3600 
+         sxbeg=170 szbeg=5 jsx=30 jsz=0 
+         gxbeg=170 gzbeg=5 jgx=3  jgz=0   
+         ''' % nshots )
+
+Result('shots','grey color=g title=shotinput scalebar=y label2= unit2=')
+
+#Create smooth model for migration
+Flow('bgvel','vel','smooth rect1=4 rect2=4 repeat=3')
+Result('bgvel',
+       '''
+       grey color=j mean=y title="Migration model" scalebar=y 
+       bartype=v barlabel="V" 	barunit="m/s"
+       ''')
+Flow('lsrtm rtm','shots bgvel',
+	'''
+        ../../user/dtrad/sflsrtmcourse vel=${SOURCES[1]} imgrtm=${TARGETS[1]}
+        nb=30 nbup=30 niter=%d 
+        ''' % niter )
+
+Flow('rtmf','rtm','math output=input*x1 | laplac ')		
+Flow('lsrtmf','lsrtm','math output=input*x1 | laplac ')		
+
+if (0):
+    Flow('junk','shots bgvel',
+	'''
+        ../../user/dtrad/sflsrtmcourse vel=${SOURCES[1]} 
+        nb=30 nbup=30 predict=0 testadj=1
+        ''')
+    
+if (0):
+    Flow('rtmcopy datp','shots bgvel rtm',
+         '''
+         ../../user/dtrad/sflsrtmcourse vel=${SOURCES[1]} 
+         nb=30 nbup=30 predict=1 givenimage=1 imagin=${SOURCES[2]} 
+         datp=${TARGETS[1]}
+         ''')
+
+
+End()

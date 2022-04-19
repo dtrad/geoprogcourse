@@ -1,0 +1,7 @@
+srcs = ['seekdemo.cpp','tanyclass.cpp','bstream.cpp','bfstream.cpp'] 
+Library('foo',srcs)
+Program('seekdemo',srcs)
+
+
+
+

@@ -1,0 +1,2 @@
+files=Split('hello.c func1.c cpptest.cpp')
+Program('hello',files)
